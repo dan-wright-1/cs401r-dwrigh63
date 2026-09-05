@@ -1,0 +1,15 @@
+# Task B3 — Remote State.
+#
+# Rename to backend.tf and fill in your bucket once it exists. The state bucket
+# must be created BEFORE you point Terraform at it: a backend cannot bootstrap
+# the bucket that stores its own state.
+#
+# terraform {
+#   backend "s3" {
+#     bucket         = "northstar-tfstate-<your-account-id>"
+#     key            = "dev/terraform.tfstate"
+#     region         = "us-east-1"
+#     encrypt        = true
+#     dynamodb_table = "northstar-tflock"
+#   }
+# }
