@@ -15,3 +15,27 @@ variable "aws_region" {
   type        = string
   default     = "us-east-1"
 }
+
+variable "vpc_cidr" {
+  description = "CIDR block for the VPC"
+  type        = string
+  default     = "10.0.0.0/16"
+}
+
+variable "public_subnet_cidr" {
+  description = "CIDR block for the public subnet"
+  type        = string
+  default     = "10.0.100.0/24"
+}
+
+variable "availability_zone" {
+  description = "Availability zone for the public subnet"
+  type        = string
+  default     = "us-east-1a"
+}
+
+variable "sagemaker_instance_type" {
+  description = "Default kernel instance type for SageMaker Studio"
+  type        = string
+  default     = "ml.t3.medium"
+}
