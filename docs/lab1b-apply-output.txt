@@ -1,0 +1,9 @@
+Apply complete! Resources: 19 added, 0 changed, 0 destroyed.
+
+Outputs:
+
+ml_engineer_role_arn = "arn:aws:iam::767397742230:role/northstar-dev-MLEngineer"
+public_subnet_id = "subnet-05df9d19ee0b6564b"
+s3_bucket_name = "northstar-dev-data-767397742230"
+sagemaker_domain_id = "d-yggx5gcgrtzc"
+vpc_id = "vpc-04f7ba14857f2a4a7"
