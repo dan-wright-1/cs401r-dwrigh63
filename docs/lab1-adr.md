@@ -12,22 +12,20 @@ model — it's the combined target of three systems: a batch churn-prediction mo
 scores every active customer weekly, an LLM/RAG offer-generation system that has to
 respond in under two seconds, and an agentic customer service system that has to hold
 99.5% uptime during business hours. All three will eventually read and write the same
-customer data, and two more roles (DataEngineer, ModelMonitor) join in Lab 2. That means
-the identity model — who is allowed to touch which data — and the storage tier structure
-— what stage of processing a given object represents — have to exist *before* any of
-those systems start moving real customer data, not be retrofitted afterward. Retrofitting
-access control after PII is already flowing through `raw/` and `processed/` under GDPR
-(Canadian customers) and CCPA (California customers) obligations would mean auditing and
-re-permissioning live data instead of just adding a new `aws_iam_role` block.
+customer data, and two more roles (DataEngineer, ModelMonitor) join in Lab 2. So the
+identity model — who may touch which data — and the storage tier structure have to exist
+*before* real customer data starts moving. Retrofitting access control once PII is
+already flowing through `raw/` and `processed/` under GDPR (Canadian customers) and CCPA
+(California customers) means auditing and re-permissioning live data instead of just
+adding an `aws_iam_role` block.
 
 ### Decision
 
 The network layer is one VPC (`northstar-dev-vpc`, `10.0.0.0/16`) with a single public
 subnet (`northstar-dev-public-1`, `10.0.100.0/24`, `us-east-1a`). SageMaker Studio runs
-here, reachable from the internet for the parts of the Studio UI that need it (image
-pulls, package installs), but the security group only allows inbound traffic from
-`10.0.0.0/16` — nothing from the open internet — so the only thing actually exposed is
-what Studio itself chooses to expose, not the network layer.
+here, reachable from the internet for what the Studio UI needs (image pulls, package
+installs), but the security group allows inbound only from `10.0.0.0/16` — nothing from
+the open internet.
 
 Storage is one S3 bucket (`northstar-dev-data-<account-id>`) with four prefixes:
 `raw/`, `processed/`, `features/`, `artifacts/`. This mirrors the actual data lifecycle
@@ -35,9 +33,8 @@ each of NorthStar's systems depends on: `raw/` is where the nightly POS export a
 Shopify webhook stream land untouched; `processed/` is cleaned, joined data; `features/`
 is what a training job actually reads; `artifacts/` is where a trained churn model or a
 registered RAG index gets written. One bucket, not four, because S3 bucket names are
-globally unique across every AWS account on the internet — with 20+ students building
-the same platform this semester, four buckets per student would have been four separate
-chances to collide with someone else's name; one bucket suffixed with the account ID
+globally unique across all of AWS — with a class of students building the same platform,
+four buckets each is four chances to collide; one bucket suffixed with the account ID
 collides with nobody.
 
 The identity model is one IAM role, `northstar-dev-MLEngineer`, trusted by
@@ -71,14 +68,12 @@ least-privilege gap (an attacker with this role could see that a file named
 properly would require S3 access points or bucket policies with explicit deny statements,
 which is more infrastructure than Lab 1's scope calls for.
 
-This distinction is not hypothetical: the first draft of this policy put the bucket-level
-ARN (`arn:aws:s3:::northstar-dev-data-*`, needed only for `ListBucket`) in the *same*
-`Resource` array as the object-level actions. IAM's ARN wildcard matches across `/`, so
-that one entry silently granted `PutObject` on `raw/` and `processed/` too — the exact
-failure this section describes, just fully realized instead of theoretical.
-`scripts/verify-lab1.sh`'s IAM policy simulation caught it (`s3:PutObject` on
-`raw/test.csv` came back `allowed` instead of `implicitDeny`), which is the whole reason
-`ListBucket` now lives in its own statement, scoped to the bucket ARN alone.
+This is not hypothetical. The first draft put the bucket-level ARN (needed only for
+`ListBucket`) in the *same* `Resource` array as the object actions; IAM's ARN wildcard
+matches across `/`, so that one entry silently granted `PutObject` on `raw/` too.
+`verify-lab1.sh`'s policy simulation caught it — `s3:PutObject` on `raw/test.csv`
+returned `allowed`, not `implicitDeny` — which is why `ListBucket` now sits in its own
+statement scoped to the bucket ARN alone.
 
 #### What would cause you to revisit this decision
 If the offer-generation system's 2-second SLA turned out to be unreachable from a
@@ -90,12 +85,10 @@ public internet — a meaningfully different design, not a tweak.
 ### Alternative Considered
 Building the SageMaker subnet as private with a NAT Gateway from the start — the
 production-appropriate configuration Lab 2 eventually uses — was the real alternative,
-not a strawman. It was rejected for Lab 1 specifically on cost and sequencing grounds: a
-NAT Gateway runs roughly $32–45/month, which against a $200 total semester credit budget
-is a meaningful chunk to spend before the platform has done anything yet, and Lab 1's
-explicit pedagogical goal is understanding the platform skeleton at the API level before
-adding networking complexity. Lab 2 introduces the private subnet once there's an actual
-reason (DataEngineer workloads that shouldn't be internet-reachable at all) to justify it.
+rejected on cost and sequencing grounds: a NAT Gateway runs roughly $32–45/month, a
+meaningful chunk of a $200 semester credit budget to spend before the platform has done
+anything. Lab 2 adds the private subnet once there's an actual reason (DataEngineer
+workloads that shouldn't be internet-reachable) to justify it.
 
 ### AWS Service Selection
 - **Networking isolation model:** A single public subnet inside one VPC, scoped down by
