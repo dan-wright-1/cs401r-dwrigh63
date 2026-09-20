@@ -71,6 +71,15 @@ least-privilege gap (an attacker with this role could see that a file named
 properly would require S3 access points or bucket policies with explicit deny statements,
 which is more infrastructure than Lab 1's scope calls for.
 
+This distinction is not hypothetical: the first draft of this policy put the bucket-level
+ARN (`arn:aws:s3:::northstar-dev-data-*`, needed only for `ListBucket`) in the *same*
+`Resource` array as the object-level actions. IAM's ARN wildcard matches across `/`, so
+that one entry silently granted `PutObject` on `raw/` and `processed/` too — the exact
+failure this section describes, just fully realized instead of theoretical.
+`scripts/verify-lab1.sh`'s IAM policy simulation caught it (`s3:PutObject` on
+`raw/test.csv` came back `allowed` instead of `implicitDeny`), which is the whole reason
+`ListBucket` now lives in its own statement, scoped to the bucket ARN alone.
+
 #### What would cause you to revisit this decision
 If the offer-generation system's 2-second SLA turned out to be unreachable from a
 public-subnet, internet-routed path to S3, or if NorthStar decided to pursue the

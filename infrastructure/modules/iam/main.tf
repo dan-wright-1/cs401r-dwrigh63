@@ -51,11 +51,23 @@ resource "aws_iam_policy" "ml_engineer" {
         Resource = "*"
       },
       {
+        # ListBucket is a bucket-level action -- it has to target the bare
+        # bucket ARN, not an object path. Kept in its own statement on
+        # purpose: folding it into S3ArtifactsAndFeatures's Resource list
+        # would put "...-data-*" (no path) in an array that also grants
+        # GetObject/PutObject/DeleteObject, and IAM's ARN wildcard matches
+        # across "/" -- so that single bucket-level entry would silently
+        # grant object writes to raw/ and processed/ too.
+        Sid      = "S3ListBucket"
+        Effect   = "Allow"
+        Action   = "s3:ListBucket"
+        Resource = "arn:aws:s3:::${var.project}-${var.environment}-data-*"
+      },
+      {
         Sid    = "S3ArtifactsAndFeatures"
         Effect = "Allow"
-        Action = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject", "s3:ListBucket"]
+        Action = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"]
         Resource = [
-          "arn:aws:s3:::${var.project}-${var.environment}-data-*",
           "arn:aws:s3:::${var.project}-${var.environment}-data-*/artifacts/*",
           "arn:aws:s3:::${var.project}-${var.environment}-data-*/features/*",
         ]
