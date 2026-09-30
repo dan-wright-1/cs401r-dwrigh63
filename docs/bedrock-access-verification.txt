@@ -1,0 +1,15 @@
+Pre-Lab 3 — Bedrock Model Access Verification
+Account: 767397742230   Region: us-east-1   Date: 2026-09-30
+
+== Step 1: Verification script (run verbatim from the pre-lab instructions) ==
+
+Models checked:
+  amazon.titan-embed-text-v2:0                    (invoke_model)
+  us.anthropic.claude-haiku-4-5-20251001-v1:0     (converse, US inference profile)
+
+Output:
+PASS  Titan embeddings        dim=1024
+PASS  Claude Haiku 4.5        'OK'
+
+Result: both PASS. No Step 2 fixes were needed — the Anthropic use-case form,
+Marketplace auto-subscription, and account token quota are all in working order.

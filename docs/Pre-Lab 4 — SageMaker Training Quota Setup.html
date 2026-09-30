@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Pre-Lab 4 — SageMaker Training Quota Setup</title>
+<style>
+ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+      line-height:1.55;max-width:52rem;margin:2rem auto;padding:0 1.25rem;color:#1a1a1a}
+ code{background:#f4f4f4;padding:.12em .35em;border-radius:3px;font-size:.92em}
+ pre{background:#f4f4f4;padding:1rem;border-radius:5px;overflow-x:auto}
+ pre code{background:none;padding:0}
+ table{border-collapse:collapse;width:100%;margin:1rem 0}
+ th,td{border:1px solid #ccc;padding:.5rem .6rem;text-align:left;vertical-align:top}
+ th{background:#f0f0f0}
+ blockquote{border-left:4px solid #c8102e;margin:1rem 0;padding:.4rem 1rem;background:#fafafa}
+ h1,h2,h3{line-height:1.25} hr{border:none;border-top:1px solid #ddd;margin:2rem 0}
+</style></head><body>
+<h1 id="pre-lab-4-sagemaker-training-quota-setup">Pre-Lab 4 — SageMaker Training Quota Setup</h1>
+<p><strong>Assigned:</strong> Thu Sep 17 (with Lab 2, alongside Pre-Lab 3) | <strong>Due:</strong> Wed Sep 30
+<strong>Effort:</strong> ~20 minutes of your time, then waiting on AWS
+<strong>Counts toward:</strong> Lab 4 Task 2 (CI/CD Pipeline). The pipeline cannot run without it, so it is verified as part of that rubric item rather than scored separately.</p>
+<p>Lab 4's pipeline runs a <strong>SageMaker Training Job</strong>. On a new AWS account, the on-demand training quota for every instance family is <strong>zero</strong>, so that job fails before it starts. This is not a billing limit you can spend your way past — there is no capacity allocated to your account at all until you ask for some.</p>
+<p>Do this while you are working on Lab 2. Lab 4 is not assigned until <strong>Oct 15</strong>, and that is exactly the point: you are filing six weeks early because the approval time is not yours to control.</p>
+<h2 id="why-this-is-a-pre-lab-and-not-a-line-in-lab-4">Why this is a pre-lab and not a line in Lab 4</h2>
+<p>You have already seen this shape once, in Pre-Lab 3. Bedrock entitlement and compute quota are the same class of problem: <strong>a dependency owned by someone else, with a lead time you cannot compress, discovered too late by teams who assumed availability.</strong></p>
+<p>The lesson is not "AWS makes you fill in forms." It is that capacity is a procurement item. A platform team that discovers its training fleet is unallocated the week of a launch has made a planning error, not hit bad luck. Filing early, with a defensible number, is the job.</p>
+<hr />
+<h2 id="what-no-quota-actually-looks-like">What "no quota" actually looks like</h2>
+<p>Your pipeline will get as far as creating the training job and then stop:</p>
+<pre><code>ResourceLimitExceeded: The account-level service limit 'ml.m5.large for
+training job usage' is 0 Instances, with current utilization of 0 Instances
+and a request delta of 1 Instances. Please use AWS Service Quotas to request
+an increase for this quota.
+</code></pre>
+<p>This is a clear error, which makes it one of the friendlier failures in this course. The trap is not the message — it is checking your quota <em>wrongly</em> and concluding you already have it.</p>
+<hr />
+<h2 id="the-trap-get-service-quota-vs-get-aws-default-service-quota">The trap: <code>get-service-quota</code> vs <code>get-aws-default-service-quota</code></h2>
+<p>There are two different questions, and they have different answers:</p>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Answers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>get-service-quota</code></td>
+<td><strong>What is applied to MY account right now</strong></td>
+</tr>
+<tr>
+<td><code>get-aws-default-service-quota</code></td>
+<td><strong>What a brand-new account starts with</strong></td>
+</tr>
+</tbody>
+</table>
+<p>An account that has been used for a while accrues elevated applied quotas quietly — from previous increase requests, sometimes from usage patterns. The course's reference account reports an applied quota of <strong>15</strong> for <code>ml.m5.large</code> training while the AWS default is <strong>0</strong>. An instructor checking <code>get-service-quota</code> on that account would conclude the lab works fine and ship you something that fails on every student machine. That is not hypothetical; it is why this pre-lab exists.</p>
+<p><strong>Check both. If they differ, the smaller one is what a new account gets.</strong></p>
+<blockquote>
+<p><strong>A second trap, worth knowing generally.</strong> <code>aws service-quotas list-service-quotas --query ...</code> applies <code>--query</code> <strong>per page</strong> and silently returns partial results — you can search for a quota, get nothing back, and wrongly conclude it does not exist. Use <code>get-service-quota</code> with an explicit quota code, or a boto3 paginator. This produced a false finding on this project on 2026-07-31.</p>
+</blockquote>
+<hr />
+<h2 id="step-1-see-what-you-actually-have">Step 1 — See what you actually have</h2>
+<pre><code class="language-bash"># What a new account starts with (expect 0)
+aws service-quotas get-aws-default-service-quota \
+  --service-code sagemaker --quota-code L-611FA074 \
+  --query 'Quota.{Name:QuotaName,Default:Value}' --output json
+
+# What is applied to your account (probably also 0)
+aws service-quotas get-service-quota \
+  --service-code sagemaker --quota-code L-611FA074 \
+  --query 'Quota.{Name:QuotaName,Applied:Value}' --output json
+</code></pre>
+<p><code>L-611FA074</code> is <strong><code>ml.m5.large</code> for training job usage</strong> — the instance type Lab 4's pipeline requests.</p>
+<h2 id="step-2-request-the-increase">Step 2 — Request the increase</h2>
+<pre><code class="language-bash">aws service-quotas request-service-quota-increase \
+  --service-code sagemaker --quota-code L-611FA074 \
+  --desired-value 2
+</code></pre>
+<p><strong>Ask for 2, not 20.</strong> One concurrent training job is all Lab 4 needs; 2 gives you room to leave a job running while you start another. A modest, justified request is also more likely to be approved quickly than a large unexplained one — and "what do you actually need?" is the question Step 4 asks you to answer.</p>
+<p>Track it:</p>
+<pre><code class="language-bash">aws service-quotas list-requested-service-quota-change-history-by-quota \
+  --service-code sagemaker --quota-code L-611FA074 \
+  --query 'RequestedQuotas[].{Status:Status,Requested:DesiredValue,Case:CaseId}' \
+  --output table
+</code></pre>
+<p>Status moves <code>PENDING</code> → <code>CASE_OPENED</code> → <code>APPROVED</code> (or <code>DENIED</code>). <strong>AWS reviews on its own schedule.</strong> This is why you are doing it in September.</p>
+<h2 id="step-3-know-your-fallback">Step 3 — Know your fallback</h2>
+<p>If your increase is still pending when you need it, <strong>spot training has non-zero defaults for 12 instance types</strong>. <code>ml.m5.large</code> spot (<code>L-29688C85</code>) has an AWS default of <strong>4</strong> — verified 2026-08-04 — against <strong>0</strong> for on-demand. Spot instances can be interrupted, so a spot training job needs checkpointing and retry handling to be safe — but for a job that trains in under two minutes on 10,000 rows, interruption risk is low.</p>
+<p>Check it:</p>
+<pre><code class="language-bash">aws service-quotas get-aws-default-service-quota \
+  --service-code sagemaker --quota-code L-29688C85 \
+  --query 'Quota.{Name:QuotaName,Default:Value}' --output json
+</code></pre>
+<p>If you take this path, say so in your Lab 4 submission and note what you changed.</p>
+<h2 id="step-4-verify-do-not-assume">Step 4 — Verify, do not assume</h2>
+<p>Do not report "I clicked request increase." Report the state:</p>
+<pre><code class="language-bash">aws service-quotas get-service-quota \
+  --service-code sagemaker --quota-code L-611FA074 \
+  --query 'Quota.Value' --output text
+</code></pre>
+<p>A non-zero number here is the only evidence that matters.</p>
+<hr />
+<h2 id="cost">Cost</h2>
+<p><strong>Requesting a quota costs nothing.</strong> A quota is permission to launch capacity, not capacity itself — an approved quota of 2 with no jobs running bills $0.00. You are billed only for training jobs you actually run, at roughly <strong>$0.10–0.30 per run</strong> on <code>ml.m5.large</code> for this course's dataset.</p>
+<p>The relevant cost discipline for training jobs is that they <strong>terminate on their own</strong> when training finishes, which is what makes them safe compared to endpoints. An endpoint bills until you delete it; a training job does not.</p>
+<hr />
+<h2 id="deliverable">Deliverable</h2>
+<p>Submit <code>docs/training-quota-verification.txt</code> <strong>by Wed Sep 30</strong>, containing:</p>
+<ol>
+<li>The Step 1 output showing the AWS <strong>default</strong> and your <strong>applied</strong> value, side by side</li>
+<li>The Step 2 request status output, or the Step 4 output if it has already been approved</li>
+<li>One short paragraph: what value you requested, why that number, and what your fallback is if it is not approved before Lab 4 opens</li>
+</ol>
+<p>Point 3 is the real assignment, and it is the same skill Pre-Lab 3 asks for. A capacity request you cannot justify is a guess, and a plan with no fallback is not a plan.</p>
+</body></html>

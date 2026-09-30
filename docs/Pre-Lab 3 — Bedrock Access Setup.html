@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Pre-Lab 3 — Bedrock Model Access Setup</title>
+<style>
+ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+      line-height:1.55;max-width:52rem;margin:2rem auto;padding:0 1.25rem;color:#1a1a1a}
+ code{background:#f4f4f4;padding:.12em .35em;border-radius:3px;font-size:.92em}
+ pre{background:#f4f4f4;padding:1rem;border-radius:5px;overflow-x:auto}
+ pre code{background:none;padding:0}
+ table{border-collapse:collapse;width:100%;margin:1rem 0}
+ th,td{border:1px solid #ccc;padding:.5rem .6rem;text-align:left;vertical-align:top}
+ th{background:#f0f0f0}
+ blockquote{border-left:4px solid #c8102e;margin:1rem 0;padding:.4rem 1rem;background:#fafafa}
+ h1,h2,h3{line-height:1.25} hr{border:none;border-top:1px solid #ddd;margin:2rem 0}
+</style></head><body>
+<h1 id="pre-lab-3-bedrock-model-access-check">Pre-Lab 3 — Bedrock Model Access Check</h1>
+<p><strong>Assigned:</strong> Thu Sep 17 (with Lab 2) | <strong>Due:</strong> Fri Oct 2
+<strong>Effort:</strong> 10–15 minutes if your account is healthy. If it isn't, you'll spend a few minutes filing a support case and then wait on AWS.
+<strong>Counts toward:</strong> Lab 3 Task 4 (Repository Quality). Lab 3 Tracks B and C need working Bedrock access.</p>
+<p>Lab 3 Tracks B and C call two models on Amazon Bedrock:</p>
+<ul>
+<li><strong>Amazon Titan Text Embeddings V2</strong> (<code>amazon.titan-embed-text-v2:0</code>)</li>
+<li><strong>Anthropic Claude Haiku 4.5</strong> (<code>us.anthropic.claude-haiku-4-5-20251001-v1:0</code>)</li>
+</ul>
+<p>For most of you this pre-lab takes ten minutes: run a script, see two <code>PASS</code> lines, and you're done. It's assigned two weeks early for the minority whose accounts are blocked in a way only AWS Support can fix, and that fix doesn't happen on your schedule.</p>
+<hr />
+<h2 id="how-bedrock-access-works-now">How Bedrock access works now</h2>
+<p>If a tutorial (or an older version of this document) tells you to open the <strong>Model access</strong> page and tick boxes, it's out of date. AWS retired that page in October 2025.</p>
+<ul>
+<li><strong>Every serverless model is enabled by default.</strong> Titan, Nova, Llama, Mistral, DeepSeek, and the rest have nothing to request.</li>
+<li><strong>Third-party models subscribe themselves the first time you call them.</strong> Bedrock creates the AWS Marketplace subscription in the background. For that to work, your IAM identity needs <code>aws-marketplace:Subscribe</code>, <code>Unsubscribe</code>, and <code>ViewSubscriptions</code> (an admin user already has them), and the account needs a valid payment method.</li>
+<li><strong>Anthropic models add one step:</strong> a one-time use-case form per account.</li>
+</ul>
+<p>So a classmate who says "I just called Claude and it worked" is probably telling the truth. Their account was in good standing and the form was already on file, or they never needed it.</p>
+<hr />
+<h2 id="step-1-run-the-verification-script">Step 1 — Run the verification script</h2>
+<p>Start here. Don't do any setup until you know what's actually broken.</p>
+<pre><code class="language-bash">python3 - &lt;&lt;'EOF'
+import boto3, json, botocore
+cfg = botocore.config.Config(retries={&quot;max_attempts&quot;: 1})
+rt = boto3.client(&quot;bedrock-runtime&quot;, region_name=&quot;us-east-1&quot;, config=cfg)
+
+# Embeddings
+try:
+    r = rt.invoke_model(modelId=&quot;amazon.titan-embed-text-v2:0&quot;,
+                        body=json.dumps({&quot;inputText&quot;: &quot;30 day return policy&quot;}))
+    dim = len(json.loads(r[&quot;body&quot;].read())[&quot;embedding&quot;])
+    print(f&quot;PASS  Titan embeddings        dim={dim}&quot;)
+except Exception as e:
+    print(f&quot;FAIL  Titan embeddings        {type(e).__name__}: {str(e)[:120]}&quot;)
+
+# Generation - note the inference profile ID, not the bare model ID
+try:
+    r = rt.converse(modelId=&quot;us.anthropic.claude-haiku-4-5-20251001-v1:0&quot;,
+                    messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: [{&quot;text&quot;: &quot;Reply with OK&quot;}]}],
+                    inferenceConfig={&quot;maxTokens&quot;: 10})
+    print(f&quot;PASS  Claude Haiku 4.5        {r['output']['message']['content'][0]['text'].strip()!r}&quot;)
+except Exception as e:
+    print(f&quot;FAIL  Claude Haiku 4.5        {type(e).__name__}: {str(e)[:120]}&quot;)
+EOF
+</code></pre>
+<p><strong>Two <code>PASS</code> lines means you're done. Save the output; it's your deliverable.</strong></p>
+<p>If either line fails, match the error below.</p>
+<hr />
+<h2 id="step-2-fix-what-failed">Step 2 — Fix what failed</h2>
+<h3 id="resourcenotfoundexception-model-use-case-details-have-not-been-submitted"><code>ResourceNotFoundException: Model use case details have not been submitted</code></h3>
+<p>You haven't submitted the Anthropic use-case form yet. This blocks every Claude model and no other model. You can submit it either way:</p>
+<p><strong>Console:</strong> Bedrock console → <strong>Model catalog</strong> → select any Anthropic model → open it in the <strong>Playground</strong>. The form appears on first use.</p>
+<p><strong>Python:</strong></p>
+<pre><code class="language-python">import boto3, json
+bedrock = boto3.client(&quot;bedrock&quot;, region_name=&quot;us-east-1&quot;)
+
+form = {
+    &quot;companyName&quot;: &quot;Brigham Young University&quot;,
+    &quot;companyWebsite&quot;: &quot;https://cs.byu.edu&quot;,     # a GitHub or portfolio URL is fine
+    &quot;intendedUsers&quot;: &quot;0&quot;,                        # 0=Internal, 1=External, 2=Both
+    &quot;industryOption&quot;: &quot;Education&quot;,
+    &quot;otherIndustryOption&quot;: &quot;Higher Education&quot;,
+    &quot;useCases&quot;: &quot;University coursework: retrieval-augmented offer generation and a &quot;
+                &quot;customer-service agent over synthetic retail data. No production traffic, &quot;
+                &quot;no real personal data.&quot;,
+}
+bedrock.put_use_case_for_model_access(formData=json.dumps(form).encode())
+bedrock.get_use_case_for_model_access()   # raises ResourceNotFoundException if it didn't register
+</code></pre>
+<p>Access is granted as soon as the form goes through, though AWS says the change can take up to 15 minutes to show up. Then re-run Step 1.</p>
+<p>The CLI version (<code>aws bedrock put-use-case-for-model-access</code>) requires <strong>AWS CLI 2.27.42 or later</strong>. On older versions the subcommand simply isn't there, and you won't get an error explaining why. Run <code>aws --version</code>, or use the Python version above.</p>
+<h3 id="accessdeniedexception"><code>AccessDeniedException</code></h3>
+<p>The automatic Marketplace subscription failed. Usually your IAM identity is missing the three <code>aws-marketplace:*</code> permissions, or the account has no valid payment method. Fix whichever it is, wait two minutes, and re-run Step 1. It can take a couple of minutes after the fix before calls stop being denied.</p>
+<h3 id="validationexception-mentioning-on-demand-throughput"><code>ValidationException</code> mentioning on-demand throughput</h3>
+<p>You used the bare model ID instead of the inference profile ID:</p>
+<pre><code class="language-python">modelId = &quot;anthropic.claude-haiku-4-5-20251001-v1:0&quot;     # WRONG
+modelId = &quot;us.anthropic.claude-haiku-4-5-20251001-v1:0&quot;  # RIGHT
+</code></pre>
+<p>Claude on Bedrock only runs through inference profiles. The <code>us.</code> prefix keeps inference inside US regions. A <code>global.</code> profile also exists, but for a retailer handling US customer data, <code>us.</code> is the right default, and you should be able to say why.</p>
+<h3 id="throttlingexception-too-many-tokens-per-day-or-too-many-requests-on-the-very-first-call"><code>ThrottlingException: Too many tokens per day</code> (or <code>Too many requests</code>) on the very first call</h3>
+<p>This is the one that justifies assigning the pre-lab early.</p>
+<p>You haven't used anything. AWS puts initial limits on some newer accounts, and for Bedrock that can mean an effective quota of zero tokens per day. The error message makes it look like you ran out.</p>
+<p>Three things to know:</p>
+<ol>
+<li><strong>Waiting won't fix it.</strong> The limit doesn't reset into anything usable.</li>
+<li><strong>Service Quotas may say you're fine.</strong> The per-minute quotas can show the full defaults (millions of tokens per minute) while the account is still blocked. The limit that's actually stopping you isn't in the Service Quotas listing, so the Step 1 script is the only reliable test.</li>
+<li><strong>You can't raise it yourself.</strong> Open an AWS Support case: <strong>Account and billing → Service limit increase (or Account verification) → Bedrock.</strong> Say that your first-ever Bedrock call returns <code>ThrottlingException: Too many tokens per day</code>, that you haven't used any quota, and that you're asking AWS to lift the initial limits on the account. Include your account ID, region (<code>us-east-1</code>), and the exact error text.</li>
+</ol>
+<p>Tell the instructor the day you open the case, and give the case ID. We're tracking how long these take.</p>
+<hr />
+<h2 id="cost">Cost</h2>
+<p>Bedrock charges per token and nothing while idle. Unlike a NAT Gateway or a SageMaker endpoint, nothing bills when you aren't calling it.</p>
+<p>Realistic Track B usage is a few dozen embedding runs over the corpus plus a few hundred generation calls for RAGAS evaluation, which comes to <strong>well under $2</strong>. Track C is similar. Bedrock has no teardown step because nothing is left running.</p>
+<hr />
+<h2 id="if-youre-still-blocked">If you're still blocked</h2>
+<p>Escalate early, not the night before the deadline.</p>
+<ol>
+<li>Re-run Step 1 and capture the exact error text.</li>
+<li>Match it to an error in Step 2.</li>
+<li>If it's the zero-quota case, check your Support case status. These cases can sit in review.</li>
+<li>Contact the instructor <strong>with the error output and case ID</strong>, not just "Bedrock doesn't work."</li>
+</ol>
+<p><strong>There is no course-managed fallback account.</strong> You set up your own account, as you'll have to at a first job, where no platform team will do it for you.</p>
+<p>A delayed Support case doesn't stop you from starting Lab 3. Track A needs no Bedrock and is worth 35 points, so sequence your work around it.</p>
+<hr />
+<h2 id="deliverable">Deliverable</h2>
+<p>Submit <code>docs/bedrock-access-verification.txt</code> <strong>by Fri Oct 2</strong>, containing the Step 1 output showing both <code>PASS</code> lines.</p>
+<p>If you're still blocked by the due date, submit the failing output and your Support case ID instead.</p>
+</body></html>
