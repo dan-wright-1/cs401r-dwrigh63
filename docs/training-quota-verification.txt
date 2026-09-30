@@ -1,0 +1,82 @@
+Pre-Lab 4 — SageMaker Training Quota Verification
+Account: 767397742230   Region: us-east-1   Date: 2026-09-29
+
+== Step 1: AWS default vs. applied (L-611FA074, ml.m5.large for training job usage) ==
+
+$ aws service-quotas get-aws-default-service-quota \
+    --service-code sagemaker --quota-code L-611FA074 \
+    --query 'Quota.{Name:QuotaName,Default:Value}' --output json
+{
+    "Name": "ml.m5.large for training job usage",
+    "Default": 0.0
+}
+
+$ aws service-quotas get-service-quota \
+    --service-code sagemaker --quota-code L-611FA074 \
+    --query 'Quota.{Name:QuotaName,Applied:Value}' --output json
+{
+    "Name": "ml.m5.large for training job usage",
+    "Applied": 0.0
+}
+
+Default = 0, Applied = 0. This account has no on-demand ml.m5.large training capacity.
+
+== Step 2: Increase request status ==
+
+$ aws service-quotas request-service-quota-increase \
+    --service-code sagemaker --quota-code L-611FA074 --desired-value 2
+  -> Status: PENDING, DesiredValue: 2.0, Created: 2026-09-29T19:57:14-06:00
+
+$ aws service-quotas list-requested-service-quota-change-history-by-quota \
+    --service-code sagemaker --quota-code L-611FA074 \
+    --query 'RequestedQuotas[].{Status:Status,Requested:DesiredValue,Case:CaseId}' \
+    --output table
+-------------------------------------------------
+| ListRequestedServiceQuotaChangeHistoryByQuota |
++-----------------+-------------+---------------+
+|      Case       |  Requested  |    Status     |
++-----------------+-------------+---------------+
+|  179073344400441|  2.0        |  CASE_OPENED  |
++-----------------+-------------+---------------+
+
+A second request attempt was rejected, confirming the open request:
+  ResourceAlreadyExistsException: Only one open service quota increase
+  request is allowed per quota.
+
+== Fallback check: spot quota (L-29688C85, ml.m5.large for spot training job usage) ==
+
+$ aws service-quotas get-aws-default-service-quota \
+    --service-code sagemaker --quota-code L-29688C85 \
+    --query 'Quota.{Name:QuotaName,Default:Value}' --output json
+{
+    "Name": "ml.m5.large for spot training job usage",
+    "Default": 4.0
+}
+
+$ aws service-quotas get-service-quota \
+    --service-code sagemaker --quota-code L-29688C85 \
+    --query 'Quota.Value' --output text
+0.0
+
+Note: the evidence here conflicts. get-service-quota reports 0 applied, but a
+request for 1 was rejected with:
+  IllegalArgumentException: You must provide a quota value greater than the
+  default quota value of 4.0
+so the request API treats 4 as this account's baseline. I have not assumed
+either value; the fallback is verified by launching a spot job (see below).
+
+== Justification ==
+
+I requested 2 concurrent on-demand ml.m5.large training instances. Lab 4's
+pipeline runs one training job at a time, so 1 is the true minimum; 2 lets a
+job keep running (or fail and hang) while I start a corrected run, without
+asking for capacity I can't justify. A quota costs nothing on its own, and
+training jobs terminate when they finish, so the extra instance only bills if
+I actually use it. If the request isn't approved before Lab 4 opens on Oct 15,
+my fallback is managed spot training on ml.m5.large (L-29688C85), with
+checkpointing and a max-wait so an interruption retries instead of failing
+the pipeline. The job trains in under two minutes on 10,000 rows, so
+interruption risk is low. Because the applied spot quota reads 0 while AWS
+treats 4 as the baseline, I will confirm the fallback with one short spot
+training job before relying on it, and request 5 (the smallest value AWS
+accepts) if that job hits ResourceLimitExceeded.
