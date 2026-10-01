@@ -28,8 +28,14 @@ variable "public_subnet_cidr" {
   default     = "10.0.100.0/24"
 }
 
+variable "private_subnet_cidr" {
+  description = "CIDR block for the private subnet (SageMaker Studio, Glue workers)"
+  type        = string
+  default     = "10.0.1.0/24"
+}
+
 variable "availability_zone" {
-  description = "Availability zone for the public subnet"
+  description = "Availability zone for the public and private subnets"
   type        = string
   default     = "us-east-1a"
 }

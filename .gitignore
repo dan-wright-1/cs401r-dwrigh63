@@ -8,3 +8,6 @@ __pycache__/
 .DS_Store
 *.zip
 .aws/
+
+# LocalStack runtime data (docker-compose volume) - includes a self-signed test key
+.localstack/

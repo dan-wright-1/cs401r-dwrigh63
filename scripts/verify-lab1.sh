@@ -10,7 +10,7 @@
 #   - SageMaker Domain is InService
 #   - Module structure, remote state, repo quality
 #   - Every committed evidence file except this script's own output
-#     (docs/lab1-verify-output.txt is what you are producing right now)
+#     (docs/lab_1/lab1-verify-output.txt is what you are producing right now)
 #
 # Not checked (deferred to Lab 2):
 #   - Lifecycle rules (added once real data flows)
@@ -156,18 +156,18 @@ grep -q "dynamodb_table" infrastructure/environments/dev/backend.tf 2>/dev/null 
   || check "B3 Remote state" "Missing dynamodb_table in backend.tf"
 
 # B2 — Apply output captured
-[ -f "docs/lab1b-apply-output.txt" ] \
+[ -f "docs/lab_1/lab1b-apply-output.txt" ] \
   && check "B2 terraform apply output saved" "PASS" \
-  || check "B2 terraform apply output saved" "docs/lab1b-apply-output.txt MISSING"
+  || check "B2 terraform apply output saved" "docs/lab_1/lab1b-apply-output.txt MISSING"
 
-grep -q "Apply complete" docs/lab1b-apply-output.txt 2>/dev/null \
+grep -q "Apply complete" docs/lab_1/lab1b-apply-output.txt 2>/dev/null \
   && check "B2 apply output shows Apply complete" "PASS" \
-  || check "B2 apply output shows Apply complete" "not found in docs/lab1b-apply-output.txt"
+  || check "B2 apply output shows Apply complete" "not found in docs/lab_1/lab1b-apply-output.txt"
 
 # B5 — LocalStack output captured
-[ -f "docs/lab1b-localstack-output.txt" ] \
+[ -f "docs/lab_1/lab1b-localstack-output.txt" ] \
   && check "B5 LocalStack validation output saved" "PASS" \
-  || check "B5 LocalStack validation output saved" "docs/lab1b-localstack-output.txt MISSING"
+  || check "B5 LocalStack validation output saved" "docs/lab_1/lab1b-localstack-output.txt MISSING"
 
 # ── Shared Deliverables ─────────────────────────────────────────────────────
 echo ""
@@ -194,21 +194,21 @@ else
   check "S No AWS credentials in git history (scripts/check-secrets.sh)" "FINDINGS — run: bash scripts/check-secrets.sh"
 fi
 
-[ -f "docs/lab1-architecture-diagram.png" ] \
+[ -f "docs/lab_1/lab1-architecture-diagram.png" ] \
   && check "A1 Architecture diagram submitted" "PASS" \
-  || check "A1 Architecture diagram submitted" "docs/lab1-architecture-diagram.png MISSING"
+  || check "A1 Architecture diagram submitted" "docs/lab_1/lab1-architecture-diagram.png MISSING"
 
-[ -f "docs/lab1-studio-shutdown.png" ] \
+[ -f "docs/lab_1/lab1-studio-shutdown.png" ] \
   && check "S Studio shutdown screenshot submitted" "PASS" \
-  || check "S Studio shutdown screenshot submitted" "docs/lab1-studio-shutdown.png MISSING"
+  || check "S Studio shutdown screenshot submitted" "docs/lab_1/lab1-studio-shutdown.png MISSING"
 
-[ -f "docs/lab1-adr.md" ] \
+[ -f "docs/lab_1/lab1-adr.md" ] \
   && check "S ADR document submitted" "PASS" \
-  || check "S ADR document submitted" "docs/lab1-adr.md MISSING"
+  || check "S ADR document submitted" "docs/lab_1/lab1-adr.md MISSING"
 
-[ -f "docs/lab1-cost-estimate.md" ] \
+[ -f "docs/lab_1/lab1-cost-estimate.md" ] \
   && check "S Cost estimate document submitted" "PASS" \
-  || check "S Cost estimate document submitted" "docs/lab1-cost-estimate.md MISSING"
+  || check "S Cost estimate document submitted" "docs/lab_1/lab1-cost-estimate.md MISSING"
 
 # ── Summary ─────────────────────────────────────────────────────────────────
 echo ""

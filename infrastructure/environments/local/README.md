@@ -17,7 +17,7 @@ awslocal ec2 describe-vpcs --query 'Vpcs[*].{Id:VpcId,CIDR:CidrBlock}'
 awslocal ec2 describe-subnets --query 'Subnets[*].{Id:SubnetId,AZ:AvailabilityZone,CIDR:CidrBlock}'
 ```
 
-Everything is written to `docs/lab1b-localstack-output.txt`. That file is your
+Everything is written to `docs/lab_1/lab1b-localstack-output.txt`. That file is your
 evidence for B5.
 
 ## 1. Start LocalStack

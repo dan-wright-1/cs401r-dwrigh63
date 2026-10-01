@@ -11,7 +11,7 @@
 # What it deliberately ignores:
 #   - AKIAIOSFODNN7EXAMPLE, the placeholder key AWS uses in its own docs. It is
 #     what LocalStack returns from sts get-caller-identity, so it appears in
-#     docs/lab1b-localstack-output.txt and environments/local/README.md in
+#     docs/lab_1/lab1b-localstack-output.txt and environments/local/README.md in
 #     every correct submission.
 #   - The word "AKIA" on its own (prose such as "starts with AKIA").
 #

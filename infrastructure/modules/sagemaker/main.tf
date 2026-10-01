@@ -19,7 +19,11 @@ resource "aws_sagemaker_domain" "this" {
   vpc_id      = var.vpc_id
   subnet_ids  = var.subnet_ids
 
-  app_network_access_type = "PublicInternetOnly"
+  # Lab 2: Studio traffic stays in the VPC and leaves through the NAT Gateway
+  # instead of SageMaker's own internet path. Pair it with a private subnet
+  # (environments/dev passes one). Changing this or subnet_ids forces the
+  # Domain to be replaced (~10 min).
+  app_network_access_type = "VpcOnly"
 
   default_user_settings {
     execution_role  = var.execution_role_arn
