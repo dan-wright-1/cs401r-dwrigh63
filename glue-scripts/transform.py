@@ -63,8 +63,34 @@ def cast_types(df):
     key for every downstream feature, so a row without it cannot be
     attributed to anyone.
     """
-    # TODO: your implementation here
-    raise NotImplementedError("cast_types is not implemented")
+    # 1 + 2: trim, then blank -> null. Cast to string first: the crawler may
+    # have inferred some columns as numeric, and trim() only works on strings.
+    for col in df.columns:
+        trimmed = F.trim(F.col(col).cast("string"))
+        df = df.withColumn(col, F.when(trimmed == "", None).otherwise(trimmed))
+
+    # 3: parse each date format only where its shape matches, then coalesce.
+    # Guarding with rlike keeps one format's parser from ever seeing the other
+    # format, which in Spark 3 can raise an upgrade exception instead of
+    # returning null.
+    raw_date = F.col("purchase_date")
+    df = df.withColumn(
+        "purchase_date",
+        F.coalesce(
+            F.when(raw_date.rlike(r"^\d{4}-\d{2}-\d{2}$"),
+                   F.to_date(raw_date, "yyyy-MM-dd")),
+            F.when(raw_date.rlike(r"^\d{1,2}/\d{1,2}/\d{4}$"),
+                   F.to_date(raw_date, "M/d/yyyy")),
+        ),
+    )
+
+    # Every other column: explicit cast to its target type.
+    for col, dtype in SCHEMA.items():
+        if col != "purchase_date":
+            df = df.withColumn(col, F.col(col).cast(dtype))
+
+    # Keep exactly the contract's columns, in contract order.
+    return df.select(*SCHEMA.keys()).filter(F.col("customer_id").isNotNull())
 
 
 def impute_nulls(df):
@@ -79,8 +105,15 @@ def impute_nulls(df):
 
     Numeric columns: NUMERIC_COLS.  String columns: STRING_COLS.
     """
-    # TODO: your implementation here
-    raise NotImplementedError("impute_nulls is not implemented")
+    fills = {}
+    for col in NUMERIC_COLS:
+        # relativeError 0.0 = exact median. approxQuantile skips nulls, so the
+        # median comes from the observed values only.
+        median = df.approxQuantile(col, [0.5], 0.0)[0]
+        fills[col] = int(round(median)) if SCHEMA[col] == "int" else float(median)
+    for col in STRING_COLS:
+        fills[col] = "unknown"
+    return df.fillna(fills)
 
 
 def deduplicate(df):
@@ -101,8 +134,19 @@ def deduplicate(df):
     A window function with row_number() over a partition by transaction_id
     is the idiomatic approach.
     """
-    # TODO: your implementation here
-    raise NotImplementedError("deduplicate is not implemented")
+    # Latest date first, then largest order. The remaining columns are only
+    # there to make the order total, so a full tie still picks the same row
+    # on every run regardless of how Spark partitioned the input.
+    tie_breakers = [c for c in SCHEMA if c not in
+                    ("transaction_id", "purchase_date", "order_value")]
+    window = Window.partitionBy("transaction_id").orderBy(
+        F.col("purchase_date").desc(),
+        F.col("order_value").desc(),
+        *[F.col(c).asc() for c in tie_breakers],
+    )
+    return (df.withColumn("_rn", F.row_number().over(window))
+              .filter(F.col("_rn") == 1)
+              .drop("_rn"))
 
 
 def main():

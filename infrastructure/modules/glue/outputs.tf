@@ -1,0 +1,19 @@
+output "database_name" {
+  description = "Glue catalog database name"
+  value       = aws_glue_catalog_database.this.name
+}
+
+output "crawler_name" {
+  description = "Name of the raw/customers crawler"
+  value       = aws_glue_crawler.raw.name
+}
+
+output "connection_name" {
+  description = "Name of the Glue NETWORK connection"
+  value       = aws_glue_connection.network.name
+}
+
+output "transform_job_name" {
+  description = "Name of the transform ETL job"
+  value       = aws_glue_job.transform.name
+}
