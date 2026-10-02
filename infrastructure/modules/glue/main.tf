@@ -5,10 +5,12 @@
 #   aws_glue_connection              NETWORK: puts job workers in the private subnet
 #   aws_glue_crawler                 raw/customers/ -> catalog table "customers"
 #   aws_s3_object                    job scripts uploaded to artifacts/glue/
-#   aws_glue_job                     transform (Task 2)
+#   aws_glue_job                     transform (Task 2), feature-engineer (Task 3)
 #
 # Every job and crawler runs as the DataEngineer role passed in from
 # modules/iam; nothing here creates IAM.
+
+data "aws_region" "current" {}
 
 locals {
   prefix = "${var.project}-${var.environment}"
@@ -102,6 +104,50 @@ resource "aws_glue_job" "transform" {
     "--database_name"                    = aws_glue_catalog_database.this.name
     "--table_name"                       = var.raw_table_name
     "--output_path"                      = "${local.bucket_uri}/${var.processed_prefix}"
+  }
+
+  execution_property {
+    max_concurrent_runs = 1
+  }
+}
+
+# ── Feature engineering job (Task 3) ────────────────────────────────────────
+# processed/customers/ -> features/customers/ (Parquet) + Feature Store
+# PutRecord. Same role, network connection, and sizing as the transform job.
+# PutRecord goes to the SageMaker Feature Store runtime endpoint, reached from
+# the private subnet through the NAT Gateway.
+
+resource "aws_s3_object" "feature_script" {
+  bucket = var.bucket_name
+  key    = "${local.scripts_key}/${var.feature_script_name}"
+  source = "${var.scripts_dir}/${var.feature_script_name}"
+  etag   = filemd5("${var.scripts_dir}/${var.feature_script_name}")
+}
+
+resource "aws_glue_job" "feature_engineer" {
+  name              = "${local.prefix}-feature-engineer"
+  description       = "RFM features, loyalty tier, churn proxy and label: processed/customers -> features/customers + Feature Store"
+  role_arn          = var.data_engineer_role_arn
+  glue_version      = var.glue_version
+  worker_type       = var.worker_type
+  number_of_workers = var.number_of_workers
+  timeout           = var.job_timeout_minutes
+  max_retries       = 0
+  connections       = [aws_glue_connection.network.name]
+
+  command {
+    name            = "glueetl"
+    python_version  = "3"
+    script_location = "${local.bucket_uri}/${aws_s3_object.feature_script.key}"
+  }
+
+  default_arguments = {
+    "--job-language"                     = "python"
+    "--enable-continuous-cloudwatch-log" = "true"
+    "--input_path"                       = "${local.bucket_uri}/${var.processed_prefix}"
+    "--output_path"                      = "${local.bucket_uri}/${var.features_prefix}"
+    "--feature_group_name"               = var.feature_group_name
+    "--region"                           = data.aws_region.current.name
   }
 
   execution_property {

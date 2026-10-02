@@ -44,6 +44,15 @@ module "sagemaker" {
   sagemaker_instance_type = var.sagemaker_instance_type
 }
 
+module "feature_store" {
+  source = "../../modules/feature_store"
+
+  project            = var.project
+  environment        = var.environment
+  bucket_name        = module.storage.bucket_name
+  execution_role_arn = module.iam.data_engineer_role_arn
+}
+
 module "glue" {
   source = "../../modules/glue"
 
@@ -55,4 +64,5 @@ module "glue" {
   availability_zone      = module.vpc.private_subnet_availability_zone
   security_group_id      = module.vpc.security_group_id
   scripts_dir            = "${path.root}/../../../glue-scripts"
+  feature_group_name     = module.feature_store.feature_group_name
 }

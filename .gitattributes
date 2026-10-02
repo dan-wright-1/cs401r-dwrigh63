@@ -1,0 +1,6 @@
+# Shell scripts, Makefiles, and Glue scripts must keep LF line endings, even on
+# Windows checkouts with core.autocrlf=true: bash cannot run a CRLF script.
+*.sh     text eol=lf
+Makefile text eol=lf
+*.py     text eol=lf
+*.tf     text eol=lf

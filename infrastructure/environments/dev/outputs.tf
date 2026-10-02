@@ -64,3 +64,13 @@ output "glue_transform_job_name" {
   description = "Transform ETL job"
   value       = module.glue.transform_job_name
 }
+
+output "glue_feature_engineer_job_name" {
+  description = "Feature engineering ETL job"
+  value       = module.glue.feature_engineer_job_name
+}
+
+output "feature_group_name" {
+  description = "SageMaker Feature Group"
+  value       = module.feature_store.feature_group_name
+}

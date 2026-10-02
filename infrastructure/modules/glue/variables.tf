@@ -99,3 +99,22 @@ variable "job_timeout_minutes" {
   type        = number
   default     = 30
 }
+
+# ── Feature engineering (Task 3) ─────────────────────────────────────────────
+
+variable "features_prefix" {
+  description = "Where the feature engineering job writes its Parquet (not the offline store prefix)"
+  type        = string
+  default     = "features/customers/"
+}
+
+variable "feature_script_name" {
+  description = "File name of the feature engineering job script inside scripts_dir"
+  type        = string
+  default     = "feature_engineer.py"
+}
+
+variable "feature_group_name" {
+  description = "Feature group the feature engineering job ingests into (from modules/feature_store)"
+  type        = string
+}
