@@ -19,9 +19,9 @@ resource "aws_sagemaker_feature_group" "customer" {
   event_time_feature_name        = var.event_time_feature_name
   role_arn                       = var.execution_role_arn
 
-  # event_time MUST be Fractional (epoch seconds). Declared as String while the
-  # job sends a number (or vice versa), PutRecord still returns success but the
-  # record never reaches either store.
+  # event_time MUST be Fractional (epoch seconds), matching what the job sends.
+  # On a type mismatch PutRecord rejects the call with a ValidationError naming
+  # the feature, and the feature engineering job fails at the ingest step.
   dynamic "feature_definition" {
     for_each = var.feature_definitions
     content {

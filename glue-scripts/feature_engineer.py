@@ -243,7 +243,8 @@ def ingest_to_feature_store(rows, feature_group_name, region, event_time):
         record = [
             {"FeatureName": "customer_id", "ValueAsString": str(r["customer_id"])},
             # event_time is Fractional: send epoch seconds as a numeric string.
-            # An ISO 8601 timestamp here is accepted and then silently dropped.
+            # An ISO 8601 timestamp here is rejected: PutRecord raises a
+            # ValidationError naming event_time, and the job fails.
             {"FeatureName": "event_time", "ValueAsString": str(event_time)},
         ] + [
             {"FeatureName": name, "ValueAsString": str(r[name])}
