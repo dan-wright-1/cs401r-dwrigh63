@@ -1,0 +1,316 @@
+[33m╷[0m[0m
+[33m│[0m [0m[1m[33mWarning: [0m[0m[1mDeprecated Parameter[0m
+[33m│[0m [0m
+[33m│[0m [0m[0mThe parameter "dynamodb_table" is deprecated. Use parameter "use_lockfile"
+[33m│[0m [0minstead.
+[33m╵[0m[0m
+[0m[1mmodule.storage.data.aws_caller_identity.current: Reading...[0m[0m
+[0m[1mmodule.vpc.aws_vpc.this: Refreshing state... [id=vpc-098924fa4d2222c73][0m
+[0m[1mmodule.iam.data.aws_region.current: Reading...[0m[0m
+[0m[1mmodule.iam.data.aws_caller_identity.current: Reading...[0m[0m
+[0m[1mmodule.glue.data.aws_region.current: Reading...[0m[0m
+[0m[1mmodule.glue.data.aws_region.current: Read complete after 0s [id=us-east-1][0m
+[0m[1mmodule.iam.data.aws_region.current: Read complete after 0s [id=us-east-1][0m
+[0m[1mmodule.storage.data.aws_caller_identity.current: Read complete after 0s [id=767397742230][0m
+[0m[1mmodule.iam.data.aws_caller_identity.current: Read complete after 0s [id=767397742230][0m
+[0m[1mmodule.vpc.aws_subnet.private: Refreshing state... [id=subnet-0a629070c7d5f0981][0m
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  [31m-[0m destroy[0m
+
+Terraform will perform the following actions:
+
+[1m  # module.vpc.aws_subnet.private[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_subnet" "private" {
+      [31m-[0m[0m arn                                            = "arn:aws:ec2:us-east-1:767397742230:subnet/subnet-0a629070c7d5f0981" [90m-> null[0m[0m
+      [31m-[0m[0m assign_ipv6_address_on_creation                = false [90m-> null[0m[0m
+      [31m-[0m[0m availability_zone                              = "us-east-1a" [90m-> null[0m[0m
+      [31m-[0m[0m availability_zone_id                           = "use1-az2" [90m-> null[0m[0m
+      [31m-[0m[0m cidr_block                                     = "10.0.1.0/24" [90m-> null[0m[0m
+      [31m-[0m[0m enable_dns64                                   = false [90m-> null[0m[0m
+      [31m-[0m[0m enable_lni_at_device_index                     = 0 [90m-> null[0m[0m
+      [31m-[0m[0m enable_resource_name_dns_a_record_on_launch    = false [90m-> null[0m[0m
+      [31m-[0m[0m enable_resource_name_dns_aaaa_record_on_launch = false [90m-> null[0m[0m
+      [31m-[0m[0m id                                             = "subnet-0a629070c7d5f0981" [90m-> null[0m[0m
+      [31m-[0m[0m ipv6_native                                    = false [90m-> null[0m[0m
+      [31m-[0m[0m map_customer_owned_ip_on_launch                = false [90m-> null[0m[0m
+      [31m-[0m[0m map_public_ip_on_launch                        = false [90m-> null[0m[0m
+      [31m-[0m[0m owner_id                                       = "767397742230" [90m-> null[0m[0m
+      [31m-[0m[0m private_dns_hostname_type_on_launch            = "ip-name" [90m-> null[0m[0m
+      [31m-[0m[0m tags                                           = {
+          [31m-[0m[0m "Name" = "northstar-dev-private-1"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m tags_all                                       = {
+          [31m-[0m[0m "Environment" = "dev"
+          [31m-[0m[0m "ManagedBy"   = "terraform"
+          [31m-[0m[0m "Name"        = "northstar-dev-private-1"
+          [31m-[0m[0m "Project"     = "northstar"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m vpc_id                                         = "vpc-098924fa4d2222c73" [90m-> null[0m[0m
+        [90m# (4 unchanged attributes hidden)[0m[0m
+    }
+
+[1m  # module.vpc.aws_vpc.this[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_vpc" "this" {
+      [31m-[0m[0m arn                                  = "arn:aws:ec2:us-east-1:767397742230:vpc/vpc-098924fa4d2222c73" [90m-> null[0m[0m
+      [31m-[0m[0m assign_generated_ipv6_cidr_block     = false [90m-> null[0m[0m
+      [31m-[0m[0m cidr_block                           = "10.0.0.0/16" [90m-> null[0m[0m
+      [31m-[0m[0m default_network_acl_id               = "acl-0c120cf779efe35fa" [90m-> null[0m[0m
+      [31m-[0m[0m default_route_table_id               = "rtb-0ac39d7cbf1916e4c" [90m-> null[0m[0m
+      [31m-[0m[0m default_security_group_id            = "sg-043d6c84eca8bedfb" [90m-> null[0m[0m
+      [31m-[0m[0m dhcp_options_id                      = "dopt-055357819931af744" [90m-> null[0m[0m
+      [31m-[0m[0m enable_dns_hostnames                 = true [90m-> null[0m[0m
+      [31m-[0m[0m enable_dns_support                   = true [90m-> null[0m[0m
+      [31m-[0m[0m enable_network_address_usage_metrics = false [90m-> null[0m[0m
+      [31m-[0m[0m id                                   = "vpc-098924fa4d2222c73" [90m-> null[0m[0m
+      [31m-[0m[0m instance_tenancy                     = "default" [90m-> null[0m[0m
+      [31m-[0m[0m ipv6_netmask_length                  = 0 [90m-> null[0m[0m
+      [31m-[0m[0m main_route_table_id                  = "rtb-0ac39d7cbf1916e4c" [90m-> null[0m[0m
+      [31m-[0m[0m owner_id                             = "767397742230" [90m-> null[0m[0m
+      [31m-[0m[0m tags                                 = {
+          [31m-[0m[0m "Name" = "northstar-dev-vpc"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m tags_all                             = {
+          [31m-[0m[0m "Environment" = "dev"
+          [31m-[0m[0m "ManagedBy"   = "terraform"
+          [31m-[0m[0m "Name"        = "northstar-dev-vpc"
+          [31m-[0m[0m "Project"     = "northstar"
+        } [90m-> null[0m[0m
+        [90m# (4 unchanged attributes hidden)[0m[0m
+    }
+
+[1mPlan:[0m [0m0 to add, 0 to change, 2 to destroy.
+
+Changes to Outputs:
+  [31m-[0m[0m feature_group_name             = "northstar-dev-customer-features" [90m-> null[0m[0m
+  [31m-[0m[0m glue_crawler_name              = "northstar-dev-raw-crawler" [90m-> null[0m[0m
+  [31m-[0m[0m glue_database_name             = "northstar_dev" [90m-> null[0m[0m
+  [31m-[0m[0m glue_feature_engineer_job_name = "northstar-dev-feature-engineer" [90m-> null[0m[0m
+  [31m-[0m[0m glue_transform_job_name        = "northstar-dev-transform" [90m-> null[0m[0m
+  [31m-[0m[0m private_subnet_id              = "subnet-0a629070c7d5f0981" [90m-> null[0m[0m
+  [31m-[0m[0m vpc_id                         = "vpc-098924fa4d2222c73" [90m-> null[0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Destroying... [id=subnet-0a629070c7d5f0981][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 00m10s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 00m20s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 00m30s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 00m40s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 00m50s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 01m00s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 01m10s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 01m20s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 01m30s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 01m40s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 01m50s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 02m00s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 02m10s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 02m20s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 02m30s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 02m40s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 02m50s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 03m00s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 03m10s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 03m20s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 03m30s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 03m40s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 03m50s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 04m00s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 04m10s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 04m20s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 04m30s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 04m40s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 04m50s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 05m00s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 05m10s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 05m20s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 05m30s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 05m40s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 05m50s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 06m00s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 06m10s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 06m20s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 06m30s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 06m40s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 06m50s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 07m00s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 07m10s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 07m20s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 07m30s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 07m40s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 07m50s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 08m00s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 08m10s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 08m20s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 08m30s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 08m40s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 08m50s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 09m00s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 09m10s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 09m20s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 09m30s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 09m40s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 09m50s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 10m00s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 10m10s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 10m20s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 10m30s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 10m40s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 10m50s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 11m00s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 11m10s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 11m20s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 11m30s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 11m40s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 11m50s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 12m00s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 12m10s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 12m20s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 12m30s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 12m40s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 12m50s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 13m00s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 13m10s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 13m20s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 13m30s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 13m40s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 13m50s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 14m00s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 14m10s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 14m20s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 14m30s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 14m40s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 14m50s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 15m00s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 15m10s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 15m20s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 15m30s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 15m40s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 15m50s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 16m00s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 16m10s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 16m20s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 16m30s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 16m40s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 16m50s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 17m00s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 17m10s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 17m20s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 17m30s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 17m40s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 17m50s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 18m00s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 18m10s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 18m20s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 18m30s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 18m40s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 18m50s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 19m00s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 19m10s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 19m20s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 19m30s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 19m40s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 19m50s elapsed][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Still destroying... [id=subnet-0a629070c7d5f0981, 20m00s elapsed][0m[0m
+[31m╷[0m[0m
+[31m│[0m [0m[1m[31mError: [0m[0m[1mdeleting EC2 Subnet (subnet-0a629070c7d5f0981): operation error EC2: DeleteSubnet, https response error StatusCode: 400, RequestID: 7a400ffa-07ff-4dd3-8504-65f2e5cc806b, api error DependencyViolation: The subnet 'subnet-0a629070c7d5f0981' has dependencies and cannot be deleted.[0m
+[31m│[0m [0m
+[31m│[0m [0m[0m
+[31m╵[0m[0m
+[33m╷[0m[0m
+[33m│[0m [0m[1m[33mWarning: [0m[0m[1mDeprecated Parameter[0m
+[33m│[0m [0m
+[33m│[0m [0m[0mThe parameter "dynamodb_table" is deprecated. Use parameter "use_lockfile"
+[33m│[0m [0minstead.
+[33m╵[0m[0m
+[0m[1mmodule.vpc.aws_vpc.this: Refreshing state... [id=vpc-098924fa4d2222c73][0m
+[0m[1mmodule.iam.data.aws_caller_identity.current: Reading...[0m[0m
+[0m[1mmodule.glue.data.aws_region.current: Reading...[0m[0m
+[0m[1mmodule.storage.data.aws_caller_identity.current: Reading...[0m[0m
+[0m[1mmodule.iam.data.aws_region.current: Reading...[0m[0m
+[0m[1mmodule.glue.data.aws_region.current: Read complete after 0s [id=us-east-1][0m
+[0m[1mmodule.iam.data.aws_region.current: Read complete after 0s [id=us-east-1][0m
+[0m[1mmodule.iam.data.aws_caller_identity.current: Read complete after 0s [id=767397742230][0m
+[0m[1mmodule.storage.data.aws_caller_identity.current: Read complete after 0s [id=767397742230][0m
+[0m[1mmodule.vpc.aws_subnet.private: Refreshing state... [id=subnet-0a629070c7d5f0981][0m
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  [31m-[0m destroy[0m
+
+Terraform will perform the following actions:
+
+[1m  # module.vpc.aws_subnet.private[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_subnet" "private" {
+      [31m-[0m[0m arn                                            = "arn:aws:ec2:us-east-1:767397742230:subnet/subnet-0a629070c7d5f0981" [90m-> null[0m[0m
+      [31m-[0m[0m assign_ipv6_address_on_creation                = false [90m-> null[0m[0m
+      [31m-[0m[0m availability_zone                              = "us-east-1a" [90m-> null[0m[0m
+      [31m-[0m[0m availability_zone_id                           = "use1-az2" [90m-> null[0m[0m
+      [31m-[0m[0m cidr_block                                     = "10.0.1.0/24" [90m-> null[0m[0m
+      [31m-[0m[0m enable_dns64                                   = false [90m-> null[0m[0m
+      [31m-[0m[0m enable_lni_at_device_index                     = 0 [90m-> null[0m[0m
+      [31m-[0m[0m enable_resource_name_dns_a_record_on_launch    = false [90m-> null[0m[0m
+      [31m-[0m[0m enable_resource_name_dns_aaaa_record_on_launch = false [90m-> null[0m[0m
+      [31m-[0m[0m id                                             = "subnet-0a629070c7d5f0981" [90m-> null[0m[0m
+      [31m-[0m[0m ipv6_native                                    = false [90m-> null[0m[0m
+      [31m-[0m[0m map_customer_owned_ip_on_launch                = false [90m-> null[0m[0m
+      [31m-[0m[0m map_public_ip_on_launch                        = false [90m-> null[0m[0m
+      [31m-[0m[0m owner_id                                       = "767397742230" [90m-> null[0m[0m
+      [31m-[0m[0m private_dns_hostname_type_on_launch            = "ip-name" [90m-> null[0m[0m
+      [31m-[0m[0m tags                                           = {
+          [31m-[0m[0m "Name" = "northstar-dev-private-1"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m tags_all                                       = {
+          [31m-[0m[0m "Environment" = "dev"
+          [31m-[0m[0m "ManagedBy"   = "terraform"
+          [31m-[0m[0m "Name"        = "northstar-dev-private-1"
+          [31m-[0m[0m "Project"     = "northstar"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m vpc_id                                         = "vpc-098924fa4d2222c73" [90m-> null[0m[0m
+        [90m# (4 unchanged attributes hidden)[0m[0m
+    }
+
+[1m  # module.vpc.aws_vpc.this[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_vpc" "this" {
+      [31m-[0m[0m arn                                  = "arn:aws:ec2:us-east-1:767397742230:vpc/vpc-098924fa4d2222c73" [90m-> null[0m[0m
+      [31m-[0m[0m assign_generated_ipv6_cidr_block     = false [90m-> null[0m[0m
+      [31m-[0m[0m cidr_block                           = "10.0.0.0/16" [90m-> null[0m[0m
+      [31m-[0m[0m default_network_acl_id               = "acl-0c120cf779efe35fa" [90m-> null[0m[0m
+      [31m-[0m[0m default_route_table_id               = "rtb-0ac39d7cbf1916e4c" [90m-> null[0m[0m
+      [31m-[0m[0m default_security_group_id            = "sg-043d6c84eca8bedfb" [90m-> null[0m[0m
+      [31m-[0m[0m dhcp_options_id                      = "dopt-055357819931af744" [90m-> null[0m[0m
+      [31m-[0m[0m enable_dns_hostnames                 = true [90m-> null[0m[0m
+      [31m-[0m[0m enable_dns_support                   = true [90m-> null[0m[0m
+      [31m-[0m[0m enable_network_address_usage_metrics = false [90m-> null[0m[0m
+      [31m-[0m[0m id                                   = "vpc-098924fa4d2222c73" [90m-> null[0m[0m
+      [31m-[0m[0m instance_tenancy                     = "default" [90m-> null[0m[0m
+      [31m-[0m[0m ipv6_netmask_length                  = 0 [90m-> null[0m[0m
+      [31m-[0m[0m main_route_table_id                  = "rtb-0ac39d7cbf1916e4c" [90m-> null[0m[0m
+      [31m-[0m[0m owner_id                             = "767397742230" [90m-> null[0m[0m
+      [31m-[0m[0m tags                                 = {
+          [31m-[0m[0m "Name" = "northstar-dev-vpc"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m tags_all                             = {
+          [31m-[0m[0m "Environment" = "dev"
+          [31m-[0m[0m "ManagedBy"   = "terraform"
+          [31m-[0m[0m "Name"        = "northstar-dev-vpc"
+          [31m-[0m[0m "Project"     = "northstar"
+        } [90m-> null[0m[0m
+        [90m# (4 unchanged attributes hidden)[0m[0m
+    }
+
+[1mPlan:[0m [0m0 to add, 0 to change, 2 to destroy.
+
+Changes to Outputs:
+  [31m-[0m[0m feature_group_name             = "northstar-dev-customer-features" [90m-> null[0m[0m
+  [31m-[0m[0m glue_crawler_name              = "northstar-dev-raw-crawler" [90m-> null[0m[0m
+  [31m-[0m[0m glue_database_name             = "northstar_dev" [90m-> null[0m[0m
+  [31m-[0m[0m glue_feature_engineer_job_name = "northstar-dev-feature-engineer" [90m-> null[0m[0m
+  [31m-[0m[0m glue_transform_job_name        = "northstar-dev-transform" [90m-> null[0m[0m
+  [31m-[0m[0m private_subnet_id              = "subnet-0a629070c7d5f0981" [90m-> null[0m[0m
+  [31m-[0m[0m vpc_id                         = "vpc-098924fa4d2222c73" [90m-> null[0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Destroying... [id=subnet-0a629070c7d5f0981][0m[0m
+[0m[1mmodule.vpc.aws_subnet.private: Destruction complete after 1s[0m
+[0m[1mmodule.vpc.aws_vpc.this: Destroying... [id=vpc-098924fa4d2222c73][0m[0m
+[0m[1mmodule.vpc.aws_vpc.this: Destruction complete after 1s[0m
+[0m[1m[32m
+Destroy complete! Resources: 2 destroyed.[0m
