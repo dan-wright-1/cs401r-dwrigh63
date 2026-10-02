@@ -24,7 +24,7 @@ locals {
 
 resource "aws_glue_catalog_database" "this" {
   name        = local.database_name
-  description = "NorthStar ${var.environment} data catalog - raw and processed customer data"
+  description = "${var.project} ${var.environment} data catalog - raw and processed customer data"
 }
 
 # ── Network connection ───────────────────────────────────────────────────────
