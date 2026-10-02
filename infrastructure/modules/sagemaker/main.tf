@@ -43,6 +43,13 @@ resource "aws_sagemaker_domain" "this" {
   tags = {
     Name = "${var.project}-${var.environment}-domain"
   }
+
+  # AWS attaches an empty studio_web_portal_settings block to the Domain on its
+  # own. We never set it, so without this every plan proposes "removing" an
+  # empty block, which AWS immediately re-adds -- a permanent no-op diff.
+  lifecycle {
+    ignore_changes = [default_user_settings[0].studio_web_portal_settings]
+  }
 }
 
 resource "aws_sagemaker_user_profile" "ml_engineer" {
