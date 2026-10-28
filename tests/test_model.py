@@ -22,6 +22,7 @@ Run locally (after the local training run in the lab handout):
 
 import json
 import os
+import warnings
 from pathlib import Path
 
 import numpy as np
@@ -423,4 +424,136 @@ class TestStoredMetricsGate:
             f"Validation churn rate {rate:.1%} outside expected range [15%, 30%]. "
             f"The reference dataset measures 22.0%. Check that your validation "
             f"split is stratified."
+        )
+
+
+# ── Regression Against the Champion ────────────────────────────────────────────
+
+MODEL_PACKAGE_GROUP = os.environ.get("MODEL_PACKAGE_GROUP", "northstar-churn-models")
+
+# How far the candidate's AUC may fall below the champion's before the build
+# fails. AUC wobbles by about this much from split to split, so a zero tolerance
+# would fail good models on noise.
+REGRESSION_TOLERANCE = 0.02
+
+
+def find_champion(sm, s3, group=MODEL_PACKAGE_GROUP):
+    """Return (version, auc_roc) of the newest Approved package, or None.
+
+    The champion is the newest *Approved* package, never simply the newest. By
+    the time this test runs, the pipeline has already registered the candidate
+    under test as PendingManualApproval, so "newest" would compare the model
+    with itself and always pass.
+
+    Takes the boto3 clients as arguments so the lookup can be tested with fakes.
+    Any AWS error propagates: a lookup that cannot run must fail the build, not
+    pass it. Only "nothing is Approved yet" returns None.
+    """
+    resp = sm.list_model_packages(
+        ModelPackageGroupName=group, ModelApprovalStatus="Approved",
+        SortBy="CreationTime", SortOrder="Descending", MaxResults=1,
+    )
+    packages = resp["ModelPackageSummaryList"]
+    if not packages:
+        return None
+    summary = packages[0]
+    detail = sm.describe_model_package(ModelPackageName=summary["ModelPackageArn"])
+    # The pipeline attaches evaluation_metrics.json as the package's ModelMetrics.
+    uri = detail["ModelMetrics"]["ModelQuality"]["Statistics"]["S3Uri"]
+    bucket, _, key = uri[len("s3://"):].partition("/")
+    body = s3.get_object(Bucket=bucket, Key=key)["Body"].read()
+    return summary["ModelPackageVersion"], float(json.loads(body)["auc_roc"])
+
+
+class _FakeBody:
+    def __init__(self, payload):
+        self._payload = payload
+
+    def read(self):
+        return json.dumps(self._payload).encode()
+
+
+class _FakeSageMaker:
+    """Stands in for boto3's SageMaker client: records what it was asked."""
+
+    def __init__(self, approved):
+        self.approved = approved   # list of (version, auc), newest first
+        self.list_kwargs = None
+
+    def list_model_packages(self, **kwargs):
+        self.list_kwargs = kwargs
+        newest = self.approved[:1]
+        return {"ModelPackageSummaryList": [
+            {"ModelPackageArn": f"arn:pkg/{v}", "ModelPackageVersion": v} for v, _ in newest]}
+
+    def describe_model_package(self, ModelPackageName):
+        return {"ModelMetrics": {"ModelQuality": {"Statistics": {
+            "S3Uri": f"s3://bucket/{ModelPackageName.rsplit('/', 1)[1]}/evaluation_metrics.json"}}}}
+
+
+class _FakeS3:
+    def __init__(self, aucs_by_version):
+        self.aucs = aucs_by_version
+
+    def get_object(self, Bucket, Key):
+        version = int(Key.split("/")[0])
+        return {"Body": _FakeBody({"auc_roc": self.aucs[version]})}
+
+
+class TestChampionLookup:
+    """The lookup logic, with no AWS: runs everywhere, including your laptop."""
+
+    def test_asks_only_for_approved_packages(self):
+        sm = _FakeSageMaker([(3, 0.80)])
+        find_champion(sm, _FakeS3({3: 0.80}))
+        assert sm.list_kwargs["ModelApprovalStatus"] == "Approved"
+        assert sm.list_kwargs["SortOrder"] == "Descending"
+
+    def test_returns_version_and_auc_of_newest_approved(self):
+        sm = _FakeSageMaker([(3, 0.80), (2, 0.70)])
+        assert find_champion(sm, _FakeS3({3: 0.80, 2: 0.70})) == (3, 0.80)
+
+    def test_no_approved_package_returns_none(self):
+        assert find_champion(_FakeSageMaker([]), _FakeS3({})) is None
+
+
+class TestRegressionAgainstChampion:
+    """The candidate must not be meaningfully worse than the model in production."""
+
+    @pytest.fixture
+    def candidate_metrics(self):
+        metrics_path = os.environ.get("EVAL_METRICS_PATH", "/tmp/eval_metrics.json")
+        if not Path(metrics_path).exists():
+            pytest.skip(f"Evaluation metrics not found at {metrics_path}.")
+        with open(metrics_path) as f:
+            return json.load(f)
+
+    def test_new_model_does_not_regress_against_champion(self, candidate_metrics):
+        """new AUC >= champion AUC - 0.02, with the champion read from the registry.
+
+        Skips (does not fail) in exactly two cases: no AWS credentials, which is
+        a laptop run, and no Approved package yet, which is the very first
+        build. Approve the first green run's package to arm this test.
+        """
+        boto3 = pytest.importorskip("boto3")
+        from botocore.exceptions import NoCredentialsError
+
+        region = os.environ.get("AWS_REGION") or os.environ.get("AWS_DEFAULT_REGION", "us-east-1")
+        try:
+            champion = find_champion(boto3.client("sagemaker", region_name=region),
+                                     boto3.client("s3", region_name=region))
+        except NoCredentialsError:
+            pytest.skip("No AWS credentials: cannot read the Model Registry from here.")
+        if champion is None:
+            pytest.skip(f"No Approved package in {MODEL_PACKAGE_GROUP} yet. Approve a "
+                        f"version from an earlier green run to enable this test.")
+
+        version, champ_auc = champion
+        new_auc = candidate_metrics["auc_roc"]
+        # Printed before asserting, so the build log records which champion this
+        # run was compared against. -rw puts it in the warnings summary.
+        warnings.warn(f"champion v{version} auc={champ_auc:.4f}; candidate auc={new_auc:.4f}")
+        assert new_auc >= champ_auc - REGRESSION_TOLERANCE, (
+            f"Candidate AUC {new_auc:.4f} is more than {REGRESSION_TOLERANCE} below "
+            f"champion v{version} ({champ_auc:.4f})."
         )

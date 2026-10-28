@@ -35,6 +35,7 @@ set ALLOW_MISSING_DATA=1 explicitly. Never make absence silent by default.
 
 import glob
 import os
+import time
 from pathlib import Path
 
 import pandas as pd
@@ -82,6 +83,15 @@ def _require(path_desc, found):
     if ALLOW_MISSING:
         pytest.skip(msg)
     pytest.fail(msg, pytrace=False)
+
+
+MAX_FEATURE_AGE_HOURS = 48
+
+
+def feature_age_hours(features, now=None):
+    """Age in hours of the newest feature record. event_time is epoch seconds."""
+    now = time.time() if now is None else now
+    return (now - float(features["event_time"].max())) / 3600.0
 
 
 def _read_parquet_dir(directory):
@@ -286,20 +296,57 @@ class TestFeatures:
             "you anchored to FEATURE_CUTOFF and not to today()"
         )
 
-    # TODO: Add a test proving no feature used post-cutoff data.
-    # Careful: processed/ CONTAINS the holdout purchases (after FEATURE_CUTOFF),
-    # because the label is built from them, so "every customer's max
-    # purchase_date is <= FEATURE_CUTOFF" is false on correct data. Test the
-    # FEATURES instead: recompute the time-sensitive ones (recency, tenure, the
-    # 30/90/180-day frequencies) from processed rows with purchase_date <=
-    # FEATURE_CUTOFF -- your data/feature_engineering.py functions do this --
-    # and assert they equal what the pipeline wrote to features/.
+    def test_no_feature_used_post_cutoff_data(self, processed_df, features_df):
+        """Recompute the time-sensitive features from pre-cutoff rows only and
+        require them to equal what the Glue job wrote.
 
-    # TODO: Add a freshness test. The pipeline should refuse to train on a
-    # feature set older than 48 hours. event_time is Fractional epoch seconds:
-    # the wall-clock time your Lab 2 feature job ran, NOT the cutoff T.
-    # Consequence: re-run the northstar-dev-feature-engineer Glue job (~90 s)
-    # before any session in which you will push, or this test fails the build.
+        processed/ CONTAINS the holdout purchases (after FEATURE_CUTOFF), because
+        the label is built from them, so "every customer's max purchase_date is
+        <= FEATURE_CUTOFF" is false on correct data. The test is on the FEATURES:
+        if the Glue job let a holdout purchase into recency, tenure or a
+        frequency window, the pandas recomputation (which drops everything after
+        the cutoff) would disagree for that customer.
+        """
+        from data.feature_engineering import build_churn_feature_set
+
+        recomputed = build_churn_feature_set(
+            features_df[["customer_id"]], processed_df, FEATURE_CUTOFF)
+        time_sensitive = ["days_since_last_purchase", "customer_tenure_days",
+                          "purchase_frequency_30d", "purchase_frequency_90d",
+                          "purchase_frequency_180d"]
+        merged = features_df[["customer_id"] + time_sensitive].merge(
+            recomputed[["customer_id"] + time_sensitive], on="customer_id",
+            suffixes=("_glue", "_pandas"))
+        assert len(merged) == len(features_df), "customers lost in the join"
+        for col in time_sensitive:
+            bad = merged[merged[f"{col}_glue"] != merged[f"{col}_pandas"]]
+            assert bad.empty, (
+                f"{col} differs from the pre-cutoff recomputation for {len(bad)} "
+                f"customers (first: {bad.iloc[0]['customer_id']}). The feature job "
+                f"may be reading purchases after FEATURE_CUTOFF.")
+
+    def test_features_are_fresh(self, features_df):
+        """The pipeline must refuse to train on a feature set older than 48 hours.
+
+        event_time is Fractional epoch seconds: the wall-clock time the Lab 2
+        feature job ran, NOT the cutoff T. Consequence: re-run the
+        northstar-dev-feature-engineer Glue job (~90 s) before any session in
+        which you will push, or this test fails the build.
+        """
+        age = feature_age_hours(features_df)
+        assert age < MAX_FEATURE_AGE_HOURS, (
+            f"Newest feature record is {age:.1f} hours old (limit "
+            f"{MAX_FEATURE_AGE_HOURS}). Re-run the northstar-dev-feature-engineer "
+            f"Glue job.")
+
+    def test_staleness_check_rejects_old_features(self):
+        """The freshness check can fail: a set whose newest record is 49 hours
+        old is over the limit, and one from an hour ago is not."""
+        now = 1_800_000_000.0
+        stale = pd.DataFrame({"event_time": [now - 49 * 3600, now - 60 * 3600]})
+        fresh = pd.DataFrame({"event_time": [now - 3600, now - 60 * 3600]})
+        assert feature_age_hours(stale, now=now) >= MAX_FEATURE_AGE_HOURS
+        assert feature_age_hours(fresh, now=now) < MAX_FEATURE_AGE_HOURS
 
 
 # ── Cross-dataset consistency ─────────────────────────────────────────────────
