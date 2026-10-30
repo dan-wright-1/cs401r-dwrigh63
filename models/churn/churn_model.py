@@ -83,6 +83,11 @@ HYPERPARAMS = {
     "subsample": 0.8, "colsample_bytree": 0.8,
     "num_round": 200, "early_stopping_rounds": 20,
 }
+# Domain constraint, not a tuned hyperparameter: a customer who has been silent
+# longer must never score as LESS likely to churn, all else equal. Without it the
+# unconstrained model dipped 0.063 between 60 and 90 days on a fixed profile and
+# failed test_model_monotone_on_recency in CI (2026-10-30).
+MONOTONE_INCREASING = ("days_since_last_purchase",)
 INNER_VAL_SIZE = 0.15   # share of training rows held out to pick the early-stopping round
 
 # Gates. There is deliberately no absolute AUC gate (see tests/test_model.py).
@@ -135,6 +140,8 @@ def train_model(X_train, y_train, X_stop, y_stop, seed: int) -> xgb.Booster:
         "subsample": HYPERPARAMS["subsample"],
         "colsample_bytree": HYPERPARAMS["colsample_bytree"],
         "scale_pos_weight": spw, "seed": seed, "verbosity": 1,
+        "monotone_constraints": "(" + ",".join(
+            "1" if c in MONOTONE_INCREASING else "0" for c in FEATURE_COLUMNS) + ")",
     }
     model = xgb.train(params, dtrain, num_boost_round=HYPERPARAMS["num_round"],
                       evals=[(dtrain, "train"), (dstop, "stop")],
