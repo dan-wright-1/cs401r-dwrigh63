@@ -125,7 +125,7 @@ data bucket across teardowns.
 
 It is not Level 2 because nothing triggers the pipeline. The Glue module's own comment reads
 "On-demand only (no schedule)", and a person starts the chain with `aws glue start-job-run`.
-Forgetting to means `test_data.py` fails the freshness check once features pass 48 hours.
+Forgetting to means `tests/test_data.py` fails the freshness check once features pass 48 hours.
 
 **Gap to Level 2:** No automatic trigger for the crawler → transform → feature-engineer chain.
 Staleness is caught only after the fact, when a CI build fails. A manual re-run on 2026-10-30
