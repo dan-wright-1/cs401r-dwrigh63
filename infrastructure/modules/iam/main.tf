@@ -91,6 +91,15 @@ resource "aws_iam_policy" "ml_engineer" {
         ]
       },
       {
+        # Lab 5: the endpoint writes DataCaptureConfig output as this role.
+        # Without it capture fails silently (InService, EnableCapture true,
+        # zero objects written).
+        Sid      = "S3DataCaptureWrite"
+        Effect   = "Allow"
+        Action   = ["s3:PutObject", "s3:AbortMultipartUpload"]
+        Resource = "${local.bucket_arn}/datacapture/*"
+      },
+      {
         Sid      = "CloudWatchLogs"
         Effect   = "Allow"
         Action   = ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"]

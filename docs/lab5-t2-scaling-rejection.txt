@@ -1,0 +1,5 @@
+﻿Lab 5 - auto-scaling attempt on ml.t2.medium (2026-11-13T21:01:02Z)
+> aws application-autoscaling register-scalable-target --cli-input-json file://deployment/configs/scalable-target.json
+
+
+aws: [ERROR]: An error occurred (ValidationException) when calling the RegisterScalableTarget operation: You cannot register a variant with ml.t2.medium instance type as a scalable target. This is because the burstable performance of these instances can lead to unpredictable behavior with Auto Scaling. Please change the instance type to a non burstable type before configuring Auto Scaling for the variant.

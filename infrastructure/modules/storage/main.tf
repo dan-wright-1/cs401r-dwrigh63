@@ -126,6 +126,11 @@ resource "aws_s3_bucket_lifecycle_configuration" "data" {
     expiration {
       days = 7
     }
+    # Versioned bucket: expiration only adds a delete marker. This makes the
+    # hidden captured data actually go away a day later (Lab 5 prereq 6).
+    noncurrent_version_expiration {
+      noncurrent_days = 1
+    }
   }
 
   # Noncurrent-version rules are meaningless until versioning is on, and S3
