@@ -112,8 +112,8 @@ After the window, delete in this order: scaling policy and target, rollback
 alarm, endpoint, endpoint configs, models. Only deleting the endpoint stops billing.
 
 ```bash
-bash scripts/teardown-lab5.sh                  # writes docs/lab5-teardown-output.txt
-grep -c ' OK$' docs/lab5-teardown-output.txt   # must print 6
+bash scripts/teardown-lab5.sh                  # writes docs/lab_5/lab5-teardown-output.txt
+grep -c ' OK$' docs/lab_5/lab5-teardown-output.txt   # must print 6
 ```
 
 Kept on purpose: model packages (metadata, unbilled) and `datacapture/` for

@@ -7,7 +7,7 @@ rediscover them.
 ## What is in AWS right now
 
 **Deleted (nothing billable is left):** the Lab 5 endpoint, configs, models, scaling
-target and rollback alarm (`docs/lab5-teardown-output.txt`, 6/6 OK), and the whole Lab 2
+target and rollback alarm (`docs/lab_5/lab5-teardown-output.txt`, 6/6 OK), and the whole Lab 2
 stack: VPC, NAT gateway, IAM roles, Glue, Feature Store group, SageMaker domain.
 
 **Kept on purpose:**
@@ -32,7 +32,7 @@ The Lab 4 CI stack (`northstar-cicd`) does not exist, so pushing to `main` start
 | ml.t2.medium endpoint | 2 (default) |
 
 Neither path is quota-blocked. Lab 5 took the real-time path without checking the
-transform quota; `docs/lab5-deployment-plan.md` section 1 explains why batch with a
+transform quota; `docs/lab_5/lab5-deployment-plan.md` section 1 explains why batch with a
 Feature Store online lookup was the better architecture.
 
 ## Rebuild steps
@@ -50,7 +50,7 @@ Feature Store online lookup was the better architecture.
    `terraform state rm` the failed resource, then `terraform import` the real one
    (`aws sagemaker list-domains`, `aws ec2 describe-nat-gateways`).
 5. Redeploy the endpoint: `deployment/configs/` holds every config, and
-   `docs/lab5-deployment-plan.md` has the commands. Models must be recreated first:
+   `docs/lab_5/lab5-deployment-plan.md` has the commands. Models must be recreated first:
    `aws sagemaker create-model --model-name northstar-churn-v5 --primary-container ModelPackageName=<pkg-arn>/5 --execution-role-arn <MLEngineer-arn>`.
 6. Teardown: `bash scripts/teardown-lab5.sh`, then `bash scripts/teardown-lab2.sh`
    (that one detaches the data bucket first; wait 15 min after any Glue job).
@@ -63,7 +63,7 @@ Feature Store online lookup was the better architecture.
 - The bucket is SSE-S3 everywhere; the Lab 5 security assessment names SSE-KMS as the
   required standard for personal-data prefixes (remediation, not yet done).
 - Model approval and deployment both run under the account admin; no Approver or Deployer
-  role exists (STRIDE row 4 in `docs/lab5-security-assessment.md`).
+  role exists (STRIDE row 4 in `docs/lab_5/lab5-security-assessment.md`).
 
 ## Windows / tooling traps
 

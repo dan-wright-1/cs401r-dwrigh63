@@ -31,9 +31,9 @@ interval, so automating condition 2 means passing the champion's scores in place
 baseline's.
 
 **Worked example from this lab.** v5 (final green run) logged
-`champion v4 auc=0.7760; candidate auc=0.7760` in `docs/lab4-build-green.log`. The AUC
+`champion v4 auc=0.7760; candidate auc=0.7760` in `docs/lab_4/lab4-build-green.log`. The AUC
 difference is zero, so its interval contains zero and v5 does **not** replace v4. v4 stays the
-champion and v5 stays `PendingManualApproval` (`docs/lab4-model-registry.json`).
+champion and v5 stays `PendingManualApproval` (`docs/lab_4/lab4-model-registry.json`).
 
 ## Retraining Triggers
 
@@ -75,13 +75,13 @@ sooner. It would start the same pipeline.
 
 ## Experiment Tracking and Lineage
 
-- **MLflow runs:** `docs/lab4-mlflow-runs.txt`. Three runs in experiment
+- **MLflow runs:** `docs/lab_4/lab4-mlflow-runs.txt`. Three runs in experiment
   `northstar-churn-lab4` on the MLflow App `northstar-mlflow`
   (`arn:aws:sagemaker:us-east-1:767397742230:mlflow-app/app-3PIYYOBQRQWE`), varying
   `max_depth` and `eta` (6/0.10, 4/0.05, 8/0.20), all with metrics logged. These ran
   Lab 3's `models/churn/train.py`. They do not include the monotone recency constraint
   that CI's `train()` has.
-- **Model lineage:** `docs/lab4-model-package.json`. Package v5's
+- **Model lineage:** `docs/lab_4/lab4-model-package.json`. Package v5's
   `CustomerMetadataProperties` hold the training data URI and timestamp, the commit SHA
   (`15cf378444422ebbacc2b8c6c5ae86b8377b8e35`, in `main` history), and the evaluation metrics.
 
@@ -108,9 +108,9 @@ and stack, with no outside credentials to manage.
 
 **One ordering detail.** Registration happens before the CodeBuild-only gate. A package that
 passes training but fails a later test is already in the registry, so `post_build` sets it to
-`Rejected`. Evidence: v3 in `docs/lab4-model-registry.json` was registered by build
+`Rejected`. Evidence: v3 in `docs/lab_4/lab4-model-registry.json` was registered by build
 `472e99d4` (commit `e692189`), which then failed `test_model_monotone_on_recency`; its
-`northstar-ci:472e99d4-…` entry is in `docs/lab4-pipeline-runs.txt`.
+`northstar-ci:472e99d4-…` entry is in `docs/lab_4/lab4-pipeline-runs.txt`.
 
 ## DataOps Maturity
 
@@ -120,7 +120,7 @@ passes training but fails a later test is already in the registry, so `post_buil
 jobs in `infrastructure/modules/glue/main.tf`, with logic in `glue-scripts/transform.py` and
 `glue-scripts/feature_engineer.py`. Validation is automated on every push:
 `tests/test_data.py` covers schema, grain, leakage, bounds and freshness, and
-`docs/lab4-build-green.log` shows 29 PASSED lines for it. `scripts/data-bucket.sh` keeps the
+`docs/lab_4/lab4-build-green.log` shows 29 PASSED lines for it. `scripts/data-bucket.sh` keeps the
 data bucket across teardowns.
 
 It is not Level 2 because nothing triggers the pipeline. The Glue module's own comment reads
@@ -142,12 +142,12 @@ refreshed weekly without anyone remembering.
 
 **Evidence:** A push to `main` triggers the whole path with no manual step:
 `pipeline.yaml` and `buildspec.yml` run test, train, gate and register.
-`docs/lab4-pipeline-runs.txt` lists the runs. The gates are enforced in code:
-`docs/lab4-build-green.log` shows 26 passed in the model gate, including the regression test
+`docs/lab_4/lab4-pipeline-runs.txt` lists the runs. The gates are enforced in code:
+`docs/lab_4/lab4-build-green.log` shows 26 passed in the model gate, including the regression test
 (`champion v4 auc=0.7760`) and the fairness flag (32.0-point recall gap). The failure path is
-measured, not claimed: `docs/lab4-failure-demo.txt` shows `PRE_BUILD FAILED`, the registry
+measured, not claimed: `docs/lab_4/lab4-failure-demo.txt` shows `PRE_BUILD FAILED`, the registry
 unchanged at v4, and the alarm going to ALARM and back to OK, with the email in
-`docs/lab4-alarm-email.png`. `docs/lab4-model-package.json` records lineage for v5.
+`docs/lab_4/lab4-alarm-email.png`. `docs/lab_4/lab4-model-package.json` records lineage for v5.
 
 **Gap to Level 3:** Retraining is not automated on any drift signal. No Model Monitor schedule
 is deployed, so nothing but a git push can start a run. The triggers above are designed, not

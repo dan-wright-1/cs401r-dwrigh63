@@ -3,7 +3,7 @@
 # Deletes everything Lab 5 can leave running and bills for.
 #
 # Why this exists when teardown-lab3.sh already deletes endpoints:
-#   * it writes docs/lab5-teardown-output.txt, which is the Lab 5 evidence gate
+#   * it writes docs/lab_5/lab5-teardown-output.txt, which is the Lab 5 evidence gate
 #   * it deletes SageMaker Models and the rollback CloudWatch alarms, neither of
 #     which the Lab 3 script touches
 #   * it asserts zero auto-scaling scalable targets in the verification block
@@ -22,7 +22,7 @@ set -uo pipefail
 aws () { command aws "$@" | tr -d '\r'; }
 export MSYS_NO_PATHCONV=1
 REGION="${AWS_DEFAULT_REGION:-us-east-1}"
-mkdir -p docs
+mkdir -p docs/lab_5
 
 echo "==> Lab 5 teardown  (account $(aws sts get-caller-identity --query Account --output text))"
 
@@ -124,4 +124,4 @@ echo "==> Verifying against the live API (not the console, which lags hours)"
     echo "==> WARNING: resources above may still be billing."
     exit 1
   fi
-} | tee docs/lab5-teardown-output.txt
+} | tee docs/lab_5/lab5-teardown-output.txt
